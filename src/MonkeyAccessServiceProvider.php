@@ -21,9 +21,17 @@ class MonkeyAccessServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-    	$this->app->middleware([
-            'load_monkey_access_rights' => 'Designitgmbh\MonkeyAccess\Http\Middleware\AccessRightsLoaderMiddleware',
-        ]);
+    	if(method_exists($this->app,'middleware'))
+        {
+            $this->app->middleware([
+                'load_monkey_access_rights' => 'Designitgmbh\MonkeyAccess\Http\Middleware\AccessRightsLoaderMiddleware',
+            ]);
+        }
+        else
+        {
+            $kernel = $this->app->make('Illuminate\Contracts\Http\Kernel');
+            $kernel->pushMiddleware(\Designitgmbh\MonkeyAccess\Http\Middleware\AccessRightsLoaderMiddleware::class);    
+        }
 
         // use this if your package has views
         // $this->loadViewsFrom(realpath(__DIR__.'/resources/views'), 'monkeyAccess');
