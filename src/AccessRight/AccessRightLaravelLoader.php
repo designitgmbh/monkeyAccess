@@ -13,21 +13,31 @@ namespace Designitgmbh\MonkeyAccess\AccessRight;
  */
 
 class AccessRightLaravelLoader {
-	static function load($currentUser) {
-		$accessRights = $currentUser->profile->accessRights;
+    private static function processAccessRights($accessRights) {
+        $loadingArray = [];
 
-		$loadingArray = [];
-		foreach($accessRights as $accessRight) {
-			$action = $accessRight->action;
-			$resource = $accessRight->resource;
-			$allowed = true; //if a constellation is given, it's allowed
+        foreach($accessRights as $accessRight) {
+            $action = $accessRight->action;
+            $resource = $accessRight->resource;
+            $allowed = true; //if a constellation is given, it's allowed
 
-			if(!isset($loadingArray[$resource]))
-				$loadingArray[$resource] = [];
+            if(!isset($loadingArray[$resource]))
+                $loadingArray[$resource] = [];
 
-			$loadingArray[$resource][$action] = $allowed;			
-		}
+            $loadingArray[$resource][$action] = $allowed;           
+        }
 
-		AccessRight::init($loadingArray, false);
+        return $loadingArray;
+    }
+
+
+	public static function load($currentUser) {
+        $accessRights = [];
+
+        if($currentUser->profile) {
+            $accessRights = self::processAccessRights($currentUser->profile->accessRights);
+        }	
+
+		AccessRight::init($accessRights, false);
 	}
 }
